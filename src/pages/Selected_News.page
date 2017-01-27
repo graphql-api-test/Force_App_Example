@@ -1,0 +1,58 @@
+<!-- All visualfroce page is wrapped in apex:page, controller specifies the apex class to user -->
+<!-- sidebar and showHeader parameter toggles the display of standard salesforce header and sidebar -->
+<apex:page sidebar="false" showHeader="false" controller="News_Feed_Controller">
+    <head>
+        <!-- apex includescipt is the equivalent of script tag in html -->
+        <!-- Check out https://jquery.com/ for more detail -->
+        <apex:includeScript value="https://code.jquery.com/jquery-3.1.1.min.js"></apex:includeScript>
+        <!-- Materialize is a rich library of css and js, allowing users to build nice looking app with no effort -->
+        <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></apex:includeScript>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css" rel="stylesheet" />
+    </head>
+    
+    <!-- Container class is used for the grid framework for materialize -->
+    <!-- See http://materializecss.com/grid.html -->
+    <div class="container">
+        <!-- Apex Repeat works like a for loop, {!LatestNewsFeed} call the get method from News_Feed_Controller -->
+        <!-- The method returns a list and thus elements in the list can be read by the apex:repeat -->
+        <apex:repeat value="{!LatestNewsFeed}" var="feed" >
+            <div class="row" id="{!feed.Id}">
+                
+                <div class="col s3">
+                    <img src="{!feed.Url_To_Image__c}" alt="" width="100%"/>
+                </div>
+                <div class="col s8">  
+                    <a href="{!feed.Url__c}">
+                        <h5>{!feed.Title__c}</h5>
+                    </a>
+                    <div>{!feed.Description__c}</div>   
+                </div>
+                <div class="col s1">
+                    <i class="material-icons delete medium" onclick="removeNewsFeed('{!feed.Id}')">delete</i>            
+                </div>
+                
+            </div>
+        </apex:repeat>
+    </div>
+    <script type="text/javascript">
+    function removeNewsFeed(Id){
+        //Visual remoting (AKA Javascript Remoting) is an asynchronous action, similar to AJAX,
+        //See: https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_js_remoting_configuring_request.htm
+        Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.News_Feed_Controller.deleteNewsFeed}', Id,
+            function(result, event){ 
+                //Success
+                if(event.status){
+                    $('#' + Id).fadeOut(300, function(){ $(this).remove();});
+                }
+                else{
+                    alert('Unexpected Error');
+                }
+            }
+            
+        );
+    } 
+    </script>
+    
+</apex:page>

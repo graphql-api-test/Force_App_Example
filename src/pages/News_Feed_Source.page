@@ -1,0 +1,93 @@
+<!-- All visualfroce page is wrapped in apex:page, controller specifies the apex class to user -->
+<!-- sidebar and showHeader parameter toggles the display of standard salesforce header and sidebar -->
+<apex:page sidebar="false" showHeader="false" controller="News_Feed_Controller">
+    <!-- apex includescipt is the equivalent of script tag in html -->
+    <!-- Check out https://jquery.com/ for more detail -->
+    <apex:includeScript value="https://code.jquery.com/jquery-3.1.1.min.js"></apex:includeScript>
+    <!-- Materialize is a rich library of css and js, allowing users to build nice looking app with no effort -->
+    <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></apex:includeScript>
+    <!-- This script makes templating a list item an very easy task  -->
+    <apex:includeScript value="https://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></apex:includeScript>    
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css" rel="stylesheet" />
+    
+    <!-- Container class is used for the grid framework for materialize -->
+    <!-- See http://materializecss.com/grid.html -->
+    <div class="container">
+        <!-- {!$CurrentPage.parameters.*} gets an URL parameter  -->
+        <div id="source" style="display: none">{!$CurrentPage.parameters.source}</div>
+        <div id="data">
+            
+        </div>
+    </div> 
+    
+    <!-- Article template  -->
+    <script id="articletemplate" type="text/x-jQuery-tmpl">
+    <div class="row" id="${id}">
+        
+        <div class="col s3">
+            <img src="${urlToImage}" alt="" width="100%"/>
+                </div>
+            <div class="col s8">  
+                <a href="${url}">
+                    <h5>${title}</h5>
+                    </a>
+                    <div>${description}</div>   
+                    </div>
+                    <div class="col s1">
+                        <i class="material-icons playlist_add medium" onclick="createNewsFeed('${author}', '${title}', '${description}', '${publishedAt}', '${url}', '${urlToImage}', '${id}')">add</i>            
+                        </div>
+                        
+                        </div>
+                        </script> 
+    <script>
+    Number.prototype.padLeft = function(base,chr){
+        var  len = (String(base || 10).length - String(this).length)+1;
+        return len > 0? new Array(len).join(chr || '0')+this : this;
+    }
+    //Jquery is valid after the document is ready
+    $(document).ready(function(){
+        var source = $("#source").text();
+        //Ajax function makes a request and gets a response at run-time
+        $.ajax({
+            url: "https://newsapi.org/v1/articles?source=" + source + "&sortBy=latest&apiKey=426b0f208acd4484a8feeaf31003ce79"
+        }).then(function(data) {
+            //hacky way to add a backslack to all single quotes
+            var safeParsedArticles = JSON.parse(JSON.stringify(data).split("'").join("\\\\'"));
+            for(var i = 0; i < safeParsedArticles.articles.length; i++){
+                safeParsedArticles.articles[i].id = 'article_' + (i+1);
+            }
+            $("#articletemplate").tmpl(safeParsedArticles.articles).appendTo("#data");    
+        });
+        
+    });
+    function createNewsFeed(author, title, description, publishedAt, url, urlToImage, index){
+        //Visual remoting (AKA Javascript Remoting) is an asynchronous action, similar to AJAX,
+        //See: https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_js_remoting_configuring_request.htm
+        Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.News_Feed_Controller.createNewsFeed}',
+            author, title, description, formatDate(new Date(publishedAt)), url, urlToImage,
+            function(result, event){ 
+                //Success
+                if(event.status){
+                    $('#' + index).fadeOut(300, function(){ $(this).remove();});
+                }
+                else{
+                    alert('Unexpected Error');
+                }
+            }
+            
+        );
+    }
+    function formatDate(d){
+        return [d.getFullYear(),
+              (d.getMonth()+1).padLeft(),
+               d.getDate().padLeft()].join('-') +' ' +
+              [d.getHours().padLeft(),
+               d.getMinutes().padLeft(),
+               d.getSeconds().padLeft()].join(':');
+
+    }
+    </script>
+</apex:page>

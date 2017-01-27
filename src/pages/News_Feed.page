@@ -1,0 +1,35 @@
+<apex:page >
+    <!-- apex includescipt is the equivalent of script tag in html -->
+    <!-- Check out https://jquery.com/ for more detail -->
+    <apex:includeScript value="https://code.jquery.com/jquery-3.1.1.min.js"></apex:includeScript>
+    <body>
+        <div id="data">
+            <table id="category">
+                <thead>
+                    <tr>
+                    	<th>Source</th>
+                        <th>Category</th>
+                    </tr>       
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </body>
+    <script>
+    $(document).ready(function(){
+        //Ajax function makes a request and gets a response at run-time
+        $.ajax({
+            url: "https://newsapi.org/v1/sources?language=en"
+        }).then(function(data) {
+            for(var i = 0; i < data.sources.length; i++){
+                $("#category tbody").append('<tr><td><a href="/apex/News_Feed_Source?source='+ data.sources[i].id + '">' + data.sources[i].name + '</a></td><td>' +
+                                          data.sources[i].category +'</td></tr>')
+            }           
+        });
+     
+    });
+    
+    //
+    </script>
+</apex:page>

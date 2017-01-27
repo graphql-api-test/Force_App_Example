@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>News_Feed</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>News_Feed_Controller</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>News_Feed_Source</members>
+        <members>News_Feed</members>
+        <members>Selected_News</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>News_Feed__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>News_Feed__c</members>
+        <members>News_Source_List</members>
+        <members>Stored_News</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>News_Feed__c-News Feed Layout</members>
+        <name>Layout</name>
+    </types>
+    <version>37.0</version>
+</Package>
